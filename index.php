@@ -2,6 +2,7 @@
 
 require_once 'Slim/Slim.php';
 require_once 'database/UserTable.php';
+require_once 'database/LocationTable';
 
 define('DEBUG', true);
 
@@ -23,10 +24,10 @@ $app->group('/api', function () use ($app) {
 
                 if ($result == false) {
                     $response['error'] = true;
-                    $response['message'] = 'Error creating new user';
+                    $response['msg'] = 'Error creating new user';
                 } else {
                     $response['error'] = false;
-                    $response['message'] = $result;
+                    $response['msg'] = $result;
                 }
 
                 echo json_encode($response);
@@ -43,10 +44,10 @@ $app->group('/api', function () use ($app) {
 
                 if ($result == false) {
                     $response['error'] = true;
-                    $response['message'] = 'Login failed';
+                    $response['msg'] = 'Login failed';
                 } else {
                     $response['error'] = false;
-                    $response['message'] = $result;
+                    $response['status'] = $result;
                 }
 
                 echo json_encode($response);
@@ -138,6 +139,32 @@ $app->group('/api', function () use ($app) {
             
             $app->post('/upload/:username/:img/:signature', function($username, $img, $signature) {
                 
+            });
+            
+        });
+        
+        $app->group('/location', function () use ($app) {
+            
+            $app->post('/addLocation/:userId/:latitude/:longitude/:signature', function($userId, $latitude, $longitude, $signature) {
+                $locationTable = new LocationTable();
+                
+                $result = null;
+                if (DEBUG) {
+                    $result = $locationTable->addLocation($userId, $latitude, $longitude);
+                } else {
+                    
+                }
+                
+                $response = array();
+                if ($result == false) {
+                    $response['error'] = true;
+                    $response['msg'] = 'Error adding location';
+                } else {
+                    $response['error'] = false;
+                    $response['status'] = $result;
+                }
+                
+                echo json_encode($response);
             });
             
         });

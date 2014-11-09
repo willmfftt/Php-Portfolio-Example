@@ -29,7 +29,7 @@ class LocationTable extends Database {
             return false;
         }
         
-        $location = R::findOne('location', 'userId=?', [$userId]);
+        $location = R::findOne('location', 'userId=?', [ $userId ]);
         
         if ($location == null || $location->isEmpty()) {
             return false;
@@ -39,6 +39,31 @@ class LocationTable extends Database {
             'latitude' => $location->latitude,
             'longitude' => $location->longitude
         );
+    }
+    
+    public function getUsersByLocation($latitude, $longitude) {
+        if (!(isset($latitude) || isset($longitude))) {
+            return false;
+        }
+        
+        $stmt = 'SELECT userId, ( '
+                . '3963 * acos ( '
+                . 'cos ( radians(?) ) '
+                . '* cos( radians( latitude ) ) '
+                . '* cos( radians( longitude ) - radians(?) ) '
+                . '+ sin( radians(?) ) '
+                . '* sin( radians( latitude ) ) '
+                . ') '
+                . ') AS distance '
+                . 'FROM location '
+                . 'HAVING distance < .5 '
+                . 'ORDER BY distance ';
+                //. 'LIMIT ?, 20';
+        $rows = R::getAll($stmt, [ $latitude, $longitude, $latitude ]);
+        
+        // Will need to return users info (picture, bio, etc)
+        
+        return $rows;
     }
     
 }
